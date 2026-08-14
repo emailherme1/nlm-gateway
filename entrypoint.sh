@@ -2,11 +2,24 @@
 set -e
 
 export DISPLAY=:99
+export PLAYWRIGHT_BROWSERS_PATH=/data/ms-playwright
 
-echo "1. Ensuring Patchright Chromium binaries exist..."
-if [ ! -d "/root/.cache/ms-playwright" ] || [ ! -f "/root/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell" ]; then
-    echo "Downloading Patchright browsers at container boot..."
+echo "1. Ensuring symlinks and persistent directories..."
+mkdir -p /data/chrome_profile
+mkdir -p /data/ms-playwright
+mkdir -p /root/.local/share/notebooklm-mcp
+mkdir -p /root/.cache
+
+ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
+ln -sf /data/ms-playwright /root/.cache/ms-playwright
+
+if [ ! -f "/data/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell" ]; then
+    echo "Downloading Patchright browser binaries into /data/ms-playwright..."
     npx patchright install chromium || npx playwright install chromium || true
+    if [ ! -f "/data/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell" ]; then
+        mkdir -p /data/ms-playwright/chromium_headless_shell-1194/chrome-linux
+        ln -sf /usr/bin/chromium /data/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+    fi
 fi
 
 echo "2. Starting Xvfb on :99 (1280x800)..."
