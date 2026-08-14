@@ -27,13 +27,14 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
-# Copy our patched TypeScript source files directly into cloned repo before build
+# Copy all patched TypeScript source files directly into cloned repo before build
 COPY src/config.ts /app/src/config.ts
 COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
 COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
+COPY src/browser/chromium-fallback.ts /app/src/browser/chromium-fallback.ts
 COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 
-# Install node dependencies & build project (tsc compiles TS -> dist/ with executablePath embedded)
+# Install node dependencies & build project
 RUN npm install
 RUN npm run build
 
