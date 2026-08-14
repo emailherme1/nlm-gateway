@@ -19,7 +19,11 @@ echo "4. Starting noVNC / websockify on port 8080..."
 websockify --web /usr/share/novnc 8080 127.0.0.1:5900 &
 sleep 1
 
-echo "5. Starting persistent Chromium supervisor daemon..."
+echo "5. Starting NotebookLM MCP HTTP Server on port 3000..."
+node dist/index.js --transport http --port 3000 --host 0.0.0.0 &
+sleep 1
+
+echo "6. Starting persistent Chromium supervisor daemon..."
 (
   while true; do
     echo "[Chromium Supervisor] Launching Chromium..."
@@ -39,5 +43,5 @@ echo "5. Starting persistent Chromium supervisor daemon..."
   done
 ) &
 
-echo "Desktop & Persistent Chromium Daemon Ready!"
+echo "Desktop, MCP Server & Persistent Chromium Daemon Ready!"
 exec tail -f /dev/null
