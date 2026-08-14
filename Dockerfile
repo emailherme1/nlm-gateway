@@ -26,6 +26,6 @@ RUN mkdir -p /data/chrome_profile
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-EXPOSE 8080 5900
+EXPOSE 3000 8080 5900
 
 CMD ["/app/entrypoint.sh"]
