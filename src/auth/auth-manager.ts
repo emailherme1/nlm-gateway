@@ -983,7 +983,7 @@ export class AuthManager {
       return loginSuccess;
     } catch (error) {
       log.error(`❌ Setup failed: ${error}`);
-      return false;
+      throw new Error(`PERFORM_SETUP_EXCEPTION: ${error instanceof Error ? (error.stack || error.message) : String(error)}`);
     }
   }
 
