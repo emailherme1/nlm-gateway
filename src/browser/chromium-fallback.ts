@@ -48,10 +48,20 @@ export function isChannelFailure(error: unknown): boolean {
  * Wrap an existing launch options object with the chosen channel. `chromium`
  * means "no channel" — the bundled binary is selected by omitting the field.
  */
+const LOW_MEMORY_FLAGS = [
+  "--no-sandbox",
+  "--disable-dev-shm-usage",
+  "--disable-gpu",
+  "--js-flags=--max-old-space-size=512",
+];
+
 export function withChannel<T extends Record<string, unknown>>(
   options: T,
   channel: BrowserChannel
 ): T {
   const { channel: _drop, ...rest } = options as { channel?: unknown } & T;
-  return { ...rest, executablePath: "/usr/bin/chromium" } as unknown as T;
+  const merged: Record<string, unknown> = { ...rest, executablePath: "/usr/bin/chromium" };
+  const existingArgs = Array.isArray(merged.args) ? (merged.args as string[]) : [];
+  merged.args = [...existingArgs, ...LOW_MEMORY_FLAGS.filter((f) => !existingArgs.includes(f))];
+  return merged as unknown as T;
 }
