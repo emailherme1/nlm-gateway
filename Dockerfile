@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
 
 ENV BROWSER_CHANNEL=chromium
 ENV BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PLAYWRIGHT_BROWSERS_PATH=/data/ms-playwright
 ENV NOTEBOOKLM_TRANSPORT=http
 ENV NOTEBOOKLM_HOST=0.0.0.0
 ENV NOTEBOOKLM_PORT=3000
@@ -31,16 +32,17 @@ COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
 COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
 
-# Install node dependencies & patchright browsers
+# Install node dependencies & build
 RUN npm install
-RUN npx patchright install-deps || true
-RUN npx patchright install || true
 RUN npm run build
 
 # Create directory for persistent Chrome profile and symlinks
 RUN mkdir -p /data/chrome_profile
+RUN mkdir -p /data/ms-playwright
 RUN mkdir -p /root/.local/share/notebooklm-mcp
+RUN mkdir -p /root/.cache
 RUN ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
+RUN ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
 # Copy entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
