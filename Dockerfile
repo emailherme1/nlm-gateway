@@ -26,20 +26,17 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
-# Copy patched TypeScript source files if present or apply inline sed
+# Replace dockets
 RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
 RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm%2Egoogle%2Ecom/notebook%2Egoogle%2Ecom/g'
 
-# Unify profile path in src/config.ts to /data/chrome_profile so MCP and noVNC use the EXACT same profile
-RUN sed -i 's/paths\.data, "chrome_profile"/\"/data/chrome_profile\"/g' src/config.ts
-
-# Force executablePath to /usr/bin/chromium in shared-context-manager.ts
-RUN sed -i 's/args: \[/executablePath: "\/usr\/bin\/chromium", args: \[/g' src/session/shared-context-manager.ts
-RUN sed -i 's/args: \[/executablePath: "\/usr\/bin\/chromium", args: \[/g' src/auth/auth-manager.ts
-
-# Build project so dist/index.js exists
+# Build project so dist/ exists
 RUN npm install
 RUN npm run build
+
+# Run node patcher on compiled dist JS files
+COPY patch_dist.js /app/patch_dist.js
+RUN node /app/patch_dist.js
 
 # Create directory for persistent Chrome profile
 RUN mkdir -p /data/chrome_profile
