@@ -26,13 +26,13 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
-# Build project first
+# Copy patched TypeScript source files directly into cloned repo
+COPY src/tools/handlers.ts /app/src/tools/handlers.ts
+COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
+
+# Build project with patched source files
 RUN npm install
 RUN npm run build
-
-# Copy and execute node patcher script on compiled dist/
-COPY patch.js /app/patch.js
-RUN node /app/patch.js
 
 # Create directory for persistent Chrome profile
 RUN mkdir -p /data/chrome_profile
