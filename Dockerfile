@@ -31,9 +31,10 @@ COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
 COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
 
-# Install patchright browsers (populates /root/.cache/ms-playwright)
+# Install patchright & playwright browsers explicitly
 RUN npm install
-RUN npx patchright install --with-deps || true
+RUN npx patchright install chromium chromium-headless-shell
+RUN npx playwright install chromium chromium-headless-shell || true
 RUN npm run build
 
 # Create directory for persistent Chrome profile and symlink for env-paths
