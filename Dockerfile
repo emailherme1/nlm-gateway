@@ -31,12 +31,15 @@ COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
 COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
 
-# Build project with patched TS source files
+# Install patchright browsers (populates /root/.cache/ms-playwright)
 RUN npm install
+RUN npx patchright install --with-deps || true
 RUN npm run build
 
-# Create directory for persistent Chrome profile
+# Create directory for persistent Chrome profile and symlink for env-paths
 RUN mkdir -p /data/chrome_profile
+RUN mkdir -p /root/.local/share/notebooklm-mcp
+RUN ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
 
 # Copy entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
