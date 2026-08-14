@@ -13,8 +13,7 @@ function replaceInAllJsFiles(dir) {
 
       // Force executablePath to /usr/bin/chromium in withChannel & launchPersistentContext calls
       if (content.includes('withChannel(')) {
-        content = content.replaceAll('withChannel(baseLaunchOptions, preferred)', 'Object.assign({}, baseLaunchOptions, { channel: undefined, executablePath: "/usr/bin/chromium" })');
-        content = content.replaceAll('withChannel(baseLaunchOptions, "chromium")', 'Object.assign({}, baseLaunchOptions, { channel: undefined, executablePath: "/usr/bin/chromium" })');
+        content = content.replace(/withChannel\([^)]+\)/g, '{ ...baseLaunchOptions, executablePath: "/usr/bin/chromium" }');
         modified = true;
       }
 
