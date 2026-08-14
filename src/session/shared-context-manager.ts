@@ -158,8 +158,6 @@ export class SharedContextManager {
     // Build launch options for persistent context
     // NOTE: userDataDir is passed as first parameter, NOT in options!
     const baseLaunchOptions = {
-      executablePath: "/usr/bin/chromium",
-      executablePath: "/usr/bin/chromium",
       headless: shouldBeHeadless,
       viewport: CONFIG.viewport,
       locale: "en-US",
@@ -171,7 +169,11 @@ export class SharedContextManager {
       // - No need for addCookies() workarounds
       // - Chrome loads everything automatically
       ...(statePath && { storageState: statePath }),
+      executablePath: "/usr/bin/chromium",
       args: [
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
         "--disable-blink-features=AutomationControlled",
         "--disable-dev-shm-usage",
         "--no-first-run",
@@ -196,7 +198,7 @@ export class SharedContextManager {
       try {
         return await chromium.launchPersistentContext(
           userDataDir,
-          { ...baseLaunchOptions, channel: undefined }
+          withChannel(baseLaunchOptions, preferred)
         );
       } catch (err) {
         if (preferred === "chrome" && isChannelFailure(err)) {
@@ -205,7 +207,7 @@ export class SharedContextManager {
           );
           return await chromium.launchPersistentContext(
             userDataDir,
-            { ...baseLaunchOptions, channel: undefined }
+            withChannel(baseLaunchOptions, "chromium")
           );
         }
         throw err;
