@@ -320,7 +320,7 @@ export class AuthManager {
           }
 
           // ✅ SIMPLE: Check if we're on NotebookLM (any path!)
-          if (currentUrl.includes("notebook.google.com") || currentUrl.includes("notebook.google.com")) {
+          if (currentUrl.startsWith("https://notebook.google.com/")) {
             await sendProgress?.("Login successful! NotebookLM detected!", 9, 10);
             log.success("✅ Login successful! NotebookLM URL detected.");
             log.success(`✅ Current URL: ${currentUrl}`);
@@ -344,7 +344,7 @@ export class AuthManager {
 
       // Timeout reached - final check
       const currentUrl = page.url();
-      if (currentUrl.includes("notebook.google.com") || currentUrl.includes("notebook.google.com")) {
+      if (currentUrl.startsWith("https://notebook.google.com/")) {
         await sendProgress?.("Login successful (detected on timeout check)!", 9, 10);
         log.success("✅ Login successful (detected on timeout check)");
         return true;
@@ -519,7 +519,7 @@ export class AuthManager {
         const currentUrl = page.url();
 
         // Simple check: Are we on NotebookLM?
-        if (currentUrl.includes("notebook.google.com") || currentUrl.includes("notebook.google.com")) {
+        if (currentUrl.startsWith("https://notebook.google.com/")) {
           log.success("    ✅ NotebookLM URL detected!");
           // Short wait to ensure page is loaded
           await page.waitForTimeout(2000);
@@ -550,7 +550,7 @@ export class AuthManager {
         const currentUrl = page.url();
 
         // Simple check: Are we on NotebookLM?
-        if (currentUrl.includes("notebook.google.com") || currentUrl.includes("notebook.google.com")) {
+        if (currentUrl.startsWith("https://notebook.google.com/")) {
           log.success("  ✅ NotebookLM URL detected");
           return true;
         }
@@ -929,11 +929,15 @@ export class AuthManager {
       // This ensures session cookies persist correctly. Channel selection +
       // fallback shared with the runtime context manager (issues #13, #19).
       const baseLaunchOptions = {
-        headless: false,
+        headless: !shouldShowBrowser,
         viewport: CONFIG.viewport,
         locale: "en-US",
         timezoneId: "Europe/Berlin",
+        executablePath: "/usr/bin/chromium",
         args: [
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
           "--disable-blink-features=AutomationControlled",
           "--disable-dev-shm-usage",
           "--no-first-run",
@@ -983,7 +987,7 @@ export class AuthManager {
       return loginSuccess;
     } catch (error) {
       log.error(`❌ Setup failed: ${error}`);
-      throw new Error(`PERFORM_SETUP_EXCEPTION: ${error instanceof Error ? (error.stack || error.message) : String(error)}`);
+      return false;
     }
   }
 
