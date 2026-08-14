@@ -32,6 +32,7 @@ RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r se
 
 # Build project so dist/ exists
 RUN npm install
+RUN npx patchright install
 RUN npm run build
 
 # Run node patcher on compiled dist JS files
