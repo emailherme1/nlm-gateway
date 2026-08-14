@@ -26,16 +26,18 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
-# Replace dockets
+# Replace domain
 RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
 RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm%2Egoogle%2Ecom/notebook%2Egoogle%2Ecom/g'
 
-# Build project so dist/ exists
+# Build project
 RUN npm install
-RUN npx patchright install
 RUN npm run build
 
-# Run node patcher on compiled dist JS files
+# Install patchright/playwright browsers into /root/.cache/ms-playwright
+RUN npx patchright install --with-deps || npx playwright install --with-deps || true
+
+# Copy and execute node patcher script on compiled dist/
 COPY patch_dist.js /app/patch_dist.js
 RUN node /app/patch_dist.js
 
