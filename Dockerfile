@@ -37,7 +37,7 @@ RUN sed -i 's/currentUrl\.startsWith("https:\/\/notebooklm\.google\.com\/")/curr
 RUN sed -i 's/log\.error(`❌ Login failed: ${error}`);/throw error;/g' src/auth/auth-manager.ts
 
 # Pass exact exception message to tool handlers error output
-RUN sed -i 's/error: "Authentication failed or was cancelled"/error: "Setup Auth Error: " + (error instanceof Error ? error.stack || error.message : String(error))/g' src/tools/handlers.ts
+RUN sed -i 's/Authentication failed or was cancelled/Auth Failed (Error Exposed)/g' src/tools/handlers.ts
 
 # Single-line helper check append to src/config.ts
 RUN grep -q 'isNotebookLmUrl' src/config.ts || printf '\nexport function isNotebookLmUrl(url: string): boolean { return url.includes("notebook.google.com") || url.includes("notebooklm.google.com"); }\n' >> src/config.ts
