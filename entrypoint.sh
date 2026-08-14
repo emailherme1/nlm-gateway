@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+mkdir -p /root/.local/share/notebooklm-mcp
+ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
+
 export DISPLAY=:99
 
 echo "1. Starting Xvfb on :99 (1280x800)..."
