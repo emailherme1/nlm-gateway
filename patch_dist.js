@@ -11,9 +11,15 @@ function replaceInAllJsFiles(dir) {
       let content = fs.readFileSync(fullPath, 'utf8');
       let modified = false;
 
-      // Force executablePath to /usr/bin/chromium in withChannel & launchPersistentContext calls
-      if (content.includes('withChannel(')) {
-        content = content.replace(/withChannel\([^)]+\)/g, '{ ...baseLaunchOptions, executablePath: "/usr/bin/chromium" }');
+      // Force executablePath in all launchPersistentContext calls
+      if (content.includes('chromium.launchPersistentContext')) {
+        content = content.replaceAll('chromium.launchPersistentContext(', 'chromium.launchPersistentContext(');
+      }
+      
+      // Override baseLaunchOptions
+      if (content.includes('baseLaunchOptions')) {
+        content = content.replaceAll('headless: !shouldShowBrowser', 'headless: false');
+        content = content.replaceAll('baseLaunchOptions = {', 'baseLaunchOptions = { executablePath: "/usr/bin/chromium",');
         modified = true;
       }
 
