@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 
 ENV BROWSER_CHANNEL=chromium
 ENV BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_BROWSERS_PATH=/data/ms-playwright
 ENV NOTEBOOKLM_TRANSPORT=http
 ENV NOTEBOOKLM_HOST=0.0.0.0
 ENV NOTEBOOKLM_PORT=3000
@@ -32,18 +32,19 @@ COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
 COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
 
-# Build project so dist/index.js exists
+# Install node dependencies & patchright browsers into /data/ms-playwright
 RUN npm install
+RUN mkdir -p /data/ms-playwright
+RUN npx patchright install --with-deps
+RUN npx patchright install chromium-headless-shell
 RUN npm run build
-
-# Create symlink for headless_shell directly under /root/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/
-RUN mkdir -p /root/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/
-RUN ln -sf /usr/bin/chromium /root/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
 
 # Create directory for persistent Chrome profile and symlink for env-paths
 RUN mkdir -p /data/chrome_profile
 RUN mkdir -p /root/.local/share/notebooklm-mcp
 RUN ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
+RUN mkdir -p /root/.cache
+RUN ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
 # Copy entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
