@@ -16,7 +16,6 @@ RUN apt-get update && apt-get install -y \
 
 ENV BROWSER_CHANNEL=chromium
 ENV BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV PLAYWRIGHT_BROWSERS_PATH=/app/ms-playwright
 ENV NOTEBOOKLM_TRANSPORT=http
 ENV NOTEBOOKLM_HOST=0.0.0.0
 ENV NOTEBOOKLM_PORT=3000
@@ -32,11 +31,17 @@ COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
 COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
 
-# Install patchright & playwright browsers explicitly into /app/ms-playwright
+# Install dependencies & patchright
 RUN npm install
-RUN mkdir -p /app/ms-playwright
-RUN npx patchright install --with-deps
-RUN npx patchright install chromium-headless-shell
+
+# Download patchright chromium binaries
+RUN npx patchright install chromium
+
+# Create symlink for headless_shell pointing to system chromium just in case
+RUN mkdir -p /root/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux
+RUN ln -sf /usr/bin/chromium /root/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
+
+# Build project so dist/index.js exists
 RUN npm run build
 
 # Create directory for persistent Chrome profile and symlink for env-paths
