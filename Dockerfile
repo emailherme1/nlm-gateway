@@ -33,9 +33,13 @@ RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r se
 # Unify profile path in src/config.ts to /data/chrome_profile so MCP and noVNC use the EXACT same profile
 RUN sed -i 's/paths\.data, "chrome_profile"/\"/data/chrome_profile\"/g' src/config.ts
 
+# Force executablePath to /usr/bin/chromium in auth-manager.ts and session-manager.ts so patchright uses system Chromium directly
+RUN sed -i 's/args: \[/executablePath: "\/usr\/bin\/chromium", args: \[/g' src/auth/auth-manager.ts
+RUN sed -i 's/args: \[/executablePath: "\/usr\/bin\/chromium", args: \[/g' src/session/session-manager.ts
+RUN sed -i 's/args: \[/executablePath: "\/usr\/bin\/chromium", args: \[/g' src/session/browser-session.ts
+
 # Build project so dist/index.js exists
 RUN npm install
-RUN npx patchright install --with-deps
 RUN npm run build
 
 # Create directory for persistent Chrome profile
