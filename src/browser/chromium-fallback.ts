@@ -52,9 +52,6 @@ export function withChannel<T extends Record<string, unknown>>(
   options: T,
   channel: BrowserChannel
 ): T {
-  if (channel === "chromium") {
-    const { channel: _drop, ...rest } = options as { channel?: unknown } & T;
-    return { ...rest, executablePath: "/usr/bin/chromium" } as T;
-  }
-  return { ...options, executablePath: "/usr/bin/chromium" } as T;
+  const { channel: _drop, ...rest } = options as { channel?: unknown } & T;
+  return { ...rest, executablePath: "/usr/bin/chromium" } as unknown as T;
 }
