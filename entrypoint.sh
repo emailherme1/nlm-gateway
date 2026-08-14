@@ -13,10 +13,12 @@ mkdir -p /root/.cache
 ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
 ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
+# Check if patchright browser binaries exist on persistent volume /data/ms-playwright
 if [ ! -f "/data/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell" ]; then
     echo "Downloading Patchright browser binaries into /data/ms-playwright..."
-    npx patchright install chromium || npx playwright install chromium || true
+    npx patchright install
     if [ ! -f "/data/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell" ]; then
+        echo "Creating fallback symlink for headless_shell to system chromium..."
         mkdir -p /data/ms-playwright/chromium_headless_shell-1194/chrome-linux
         ln -sf /usr/bin/chromium /data/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell
     fi
