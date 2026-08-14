@@ -9,15 +9,30 @@ RUN apt-get update && apt-get install -y \
     novnc \
     websockify \
     git \
+    patch \
     ca-certificates \
     procps \
     && rm -rf /var/lib/apt/lists/*
 
 ENV BROWSER_CHANNEL=chromium
 ENV BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV NOTEBOOKLM_TRANSPORT=http
+ENV NOTEBOOKLM_HOST=0.0.0.0
+ENV NOTEBOOKLM_PORT=3000
 ENV DISPLAY=:99
 
 WORKDIR /app
+
+# Clone notebooklm-mcp v2.0.0 tag
+RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
+
+# Copy patched TypeScript source files if present or apply inline sed
+RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
+RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm%2Egoogle%2Ecom/notebook%2Egoogle%2Ecom/g'
+
+# Build project so dist/index.js exists
+RUN npm install
+RUN npm run build
 
 # Create directory for persistent Chrome profile
 RUN mkdir -p /data/chrome_profile
