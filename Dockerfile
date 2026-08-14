@@ -27,13 +27,10 @@ WORKDIR /app
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
 # Structure-independent patch for Google Rebrand (notebooklm.google.com -> notebook.google.com)
-RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src \
-    | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
+RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
 
-# Conditional helper check in src/config.ts
-RUN grep -q 'isNotebookLmUrl' src/config.ts \
-    || echo '
-export function isNotebookLmUrl(url: string): boolean { return url.includes("notebook.google.com") || url.includes("notebooklm.google.com"); }' >> src/config.ts
+# Single-line helper check append to src/config.ts
+RUN grep -q 'isNotebookLmUrl' src/config.ts || printf '\nexport function isNotebookLmUrl(url: string): boolean { return url.includes("notebook.google.com") || url.includes("notebooklm.google.com"); }\n' >> src/config.ts
 
 # Build project
 RUN npm install
