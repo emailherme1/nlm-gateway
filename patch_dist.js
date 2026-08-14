@@ -11,15 +11,9 @@ function replaceInAllJsFiles(dir) {
       let content = fs.readFileSync(fullPath, 'utf8');
       let modified = false;
 
-      // Force executablePath in all launchPersistentContext calls
-      if (content.includes('chromium.launchPersistentContext')) {
-        content = content.replaceAll('chromium.launchPersistentContext(', 'chromium.launchPersistentContext(');
-      }
-      
-      // Override baseLaunchOptions
-      if (content.includes('baseLaunchOptions')) {
-        content = content.replaceAll('headless: !shouldShowBrowser', 'headless: false');
-        content = content.replaceAll('baseLaunchOptions = {', 'baseLaunchOptions = { executablePath: "/usr/bin/chromium",');
+      // Add executablePath directly inside baseLaunchOptions
+      if (content.includes('headless: shouldBeHeadless')) {
+        content = content.replaceAll('headless: shouldBeHeadless', 'executablePath: "/usr/bin/chromium", headless: shouldBeHeadless');
         modified = true;
       }
 
