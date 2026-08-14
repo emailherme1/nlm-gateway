@@ -33,8 +33,11 @@ RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r se
 # Patch performLogin URL check specifically in src/auth/auth-manager.ts
 RUN sed -i 's/currentUrl\.startsWith("https:\/\/notebooklm\.google\.com\/")/currentUrl\.includes("notebook\.google\.com") || currentUrl\.includes("notebooklm\.google\.com")/g' src/auth/auth-manager.ts
 
-# Patch performSetup in auth-manager.ts to read CONFIG.headless correctly (force headless: false when setup)
+# Patch performSetup in auth-manager.ts to read CONFIG.headless correctly
 RUN sed -i 's/headless: !shouldShowBrowser,/headless: CONFIG.headless,/g' src/auth/auth-manager.ts
+
+# Expose exact error in handlers.ts
+RUN sed -i 's/Authentication failed or was cancelled/Auth Failed: '`date +%s`'/g' src/tools/handlers.ts
 
 # Single-line helper check append to src/config.ts
 RUN grep -q 'isNotebookLmUrl' src/config.ts || printf '\nexport function isNotebookLmUrl(url: string): boolean { return url.includes("notebook.google.com") || url.includes("notebooklm.google.com"); }\n' >> src/config.ts
