@@ -499,7 +499,7 @@ export class ToolHandlers {
         log.error(`❌ [TOOL] setup_auth failed (${durationSeconds.toFixed(1)}s)`);
         return {
           success: false,
-          error: "EXPOSED_DEPLOYMENT_ACTIVE_AUTH_FAIL: " + (error instanceof Error ? (error.stack || error.message) : String(error)),
+          error: "Authentication failed or was cancelled (performSetup returned false)",
         };
       }
     } catch (error) {
