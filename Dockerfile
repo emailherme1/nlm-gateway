@@ -1,7 +1,17 @@
 FROM node:20-slim
 
 # Install Chromium, xvfb, x11vnc, novnc, websockify, git, patch, ca-certificates
-RUN apt-get update && apt-get install -y     chromium     xvfb     x11vnc     novnc     websockify     git     patch     ca-certificates     procps     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    chromium \
+    xvfb \
+    x11vnc \
+    novnc \
+    websockify \
+    git \
+    patch \
+    ca-certificates \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set environment for patchright/chromium
 ENV BROWSER_CHANNEL=chromium
@@ -16,13 +26,14 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
-# Apply Google Rebrand Patches (notebooklm.google.com -> notebook.google.com)
-RUN sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g' src/config.ts
-RUN sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g' src/auth/auth-manager.ts
-RUN sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g' src/chat/chat-session.ts
+# Structure-independent patch for Google Rebrand (notebooklm.google.com -> notebook.google.com)
+RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src \
+    | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
 
-# Add isNotebookLmUrl helper check to src/config.ts if missing
-RUN echo '\nexport function isNotebookLmUrl(url: string): boolean { return url.includes("notebook.google.com") || url.includes("notebooklm.google.com"); }' >> src/config.ts
+# Conditional helper check in src/config.ts
+RUN grep -q 'isNotebookLmUrl' src/config.ts \
+    || echo '
+export function isNotebookLmUrl(url: string): boolean { return url.includes("notebook.google.com") || url.includes("notebooklm.google.com"); }' >> src/config.ts
 
 # Build project
 RUN npm install
