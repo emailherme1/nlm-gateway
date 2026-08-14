@@ -195,7 +195,7 @@ export class SharedContextManager {
       try {
         return await chromium.launchPersistentContext(
           userDataDir,
-          withChannel(baseLaunchOptions, preferred)
+          { ...baseLaunchOptions, channel: undefined }
         );
       } catch (err) {
         if (preferred === "chrome" && isChannelFailure(err)) {
@@ -204,7 +204,7 @@ export class SharedContextManager {
           );
           return await chromium.launchPersistentContext(
             userDataDir,
-            withChannel(baseLaunchOptions, "chromium")
+            { ...baseLaunchOptions, channel: undefined }
           );
         }
         throw err;
