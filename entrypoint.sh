@@ -1,32 +1,35 @@
 #!/bin/bash
 set -e
 
-mkdir -p /root/.local/share/notebooklm-mcp
-ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
-
 export DISPLAY=:99
 
-echo "1. Starting Xvfb on :99 (1280x800)..."
+echo "1. Ensuring Patchright Chromium binaries exist..."
+if [ ! -d "/root/.cache/ms-playwright" ] || [ ! -f "/root/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell" ]; then
+    echo "Downloading Patchright browsers at container boot..."
+    npx patchright install chromium || npx playwright install chromium || true
+fi
+
+echo "2. Starting Xvfb on :99 (1280x800)..."
 Xvfb :99 -screen 0 1280x800x24 &
 sleep 2
 
-echo "2. Starting Fluxbox Window Manager..."
+echo "3. Starting Fluxbox Window Manager..."
 fluxbox &
 sleep 1
 
-echo "3. Starting x11vnc (no password)..."
+echo "4. Starting x11vnc (no password)..."
 x11vnc -rfbport 5900 -nopw -display :99 -forever -shared &
 sleep 1
 
-echo "4. Starting noVNC / websockify on port 8080..."
+echo "5. Starting noVNC / websockify on port 8080..."
 websockify --web /usr/share/novnc 8080 127.0.0.1:5900 &
 sleep 1
 
-echo "5. Starting NotebookLM MCP HTTP Server on port 3000..."
+echo "6. Starting NotebookLM MCP HTTP Server on port 3000..."
 node dist/index.js --transport http --port 3000 --host 0.0.0.0 &
 sleep 1
 
-echo "6. Starting persistent Chromium supervisor daemon..."
+echo "7. Starting persistent Chromium supervisor daemon..."
 (
   while true; do
     echo "[Chromium Supervisor] Launching Chromium..."
