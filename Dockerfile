@@ -35,7 +35,7 @@ RUN sed -i 's/paths\.data, "chrome_profile"/\"/data/chrome_profile\"/g' src/conf
 
 # Build project so dist/index.js exists
 RUN npm install
-RUN npx patchright install
+RUN npx patchright install --with-deps
 RUN npm run build
 
 # Create directory for persistent Chrome profile
