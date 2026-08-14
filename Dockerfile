@@ -32,19 +32,14 @@ COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
 COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
 
-# Install node dependencies & patchright browsers into /data/ms-playwright
+# Build project so dist/index.js exists
 RUN npm install
-RUN mkdir -p /data/ms-playwright
-RUN npx patchright install --with-deps
-RUN npx patchright install chromium-headless-shell
 RUN npm run build
 
-# Create directory for persistent Chrome profile and symlink for env-paths
+# Create directory for persistent Chrome profile and symlinks
 RUN mkdir -p /data/chrome_profile
 RUN mkdir -p /root/.local/share/notebooklm-mcp
 RUN ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
-RUN mkdir -p /root/.cache
-RUN ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
 # Copy entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
