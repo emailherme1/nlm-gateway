@@ -159,6 +159,7 @@ export class SharedContextManager {
     // NOTE: userDataDir is passed as first parameter, NOT in options!
     const baseLaunchOptions = {
       executablePath: "/usr/bin/chromium",
+      executablePath: "/usr/bin/chromium",
       headless: shouldBeHeadless,
       viewport: CONFIG.viewport,
       locale: "en-US",
