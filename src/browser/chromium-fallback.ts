@@ -57,7 +57,7 @@ const LOW_MEMORY_FLAGS = [
 
 export function withChannel<T extends Record<string, unknown>>(
   options: T,
-  channel: BrowserChannel
+  _channel: BrowserChannel
 ): T {
   const { channel: _drop, ...rest } = options as { channel?: unknown } & T;
   const merged: Record<string, unknown> = { ...rest, executablePath: "/usr/bin/chromium" };
