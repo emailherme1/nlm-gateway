@@ -26,25 +26,13 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
-# Comprehensive Patch for Google Rebrand across all source files & hardcoded string checks
-RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
-RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm%2Egoogle%2Ecom/notebook%2Egoogle%2Ecom/g'
-
-# Patch performLogin URL check specifically in src/auth/auth-manager.ts
-RUN sed -i 's/currentUrl\.startsWith("https:\/\/notebooklm\.google\.com\/")/currentUrl\.includes("notebook\.google\.com") || currentUrl\.includes("notebooklm\.google\.com")/g' src/auth/auth-manager.ts
-
-# Catch and surface launch error in auth-manager.ts performSetup
-RUN sed -i 's/log\.error(`❌ Login failed: ${error}`);/throw error;/g' src/auth/auth-manager.ts
-
-# Pass exact exception message to tool handlers error output
-RUN sed -i 's/Authentication failed or was cancelled/Auth Failed (Error Exposed)/g' src/tools/handlers.ts
-
-# Single-line helper check append to src/config.ts
-RUN grep -q 'isNotebookLmUrl' src/config.ts || printf '\nexport function isNotebookLmUrl(url: string): boolean { return url.includes("notebook.google.com") || url.includes("notebooklm.google.com"); }\n' >> src/config.ts
-
-# Build project
+# Build project first
 RUN npm install
 RUN npm run build
+
+# Copy and execute node patcher script on compiled dist/
+COPY patch.js /app/patch.js
+RUN node /app/patch.js
 
 # Create directory for persistent Chrome profile
 RUN mkdir -p /data/chrome_profile
