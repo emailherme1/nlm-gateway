@@ -4,14 +4,16 @@ set -e
 export DISPLAY=:99
 export PLAYWRIGHT_BROWSERS_PATH=/data/ms-playwright
 
-echo "1. Ensuring persistent directories, symlinks & clearing stale Chromium locks..."
+echo "1. Ensuring persistent directories, symlinks & cleaning up chromium locks..."
 mkdir -p /data/chrome_profile
 mkdir -p /data/ms-playwright
 mkdir -p /root/.local/share/notebooklm-mcp
 mkdir -p /root/.cache
 
-# Remove stale Chromium process singleton locks so MCP server can access the profile
-rm -f /data/chrome_profile/SingletonLock /data/chrome_profile/SingletonSocket /data/chrome_profile/SingletonCookie 2>/dev/null || true
+# Kill any stale chromium or chrome process that holds the lock
+pkill -9 chromium || true
+pkill -9 chrome || true
+rm -rf /data/chrome_profile/Singleton* 2>/dev/null || true
 
 ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
 ln -sf /data/ms-playwright /root/.cache/ms-playwright
@@ -36,5 +38,5 @@ echo "6. Starting NotebookLM MCP HTTP Server on port 3000..."
 node dist/index.js --transport http --port 3000 --host 0.0.0.0 &
 sleep 1
 
-echo "Desktop & MCP Server Ready! (Standalone Chromium daemon disabled to prevent profile lock conflicts with MCP)"
+echo "Desktop & MCP Server Ready! (No background daemon locking Chrome profile)"
 exec tail -f /dev/null
