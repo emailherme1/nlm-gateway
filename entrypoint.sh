@@ -4,19 +4,26 @@ set -e
 export DISPLAY=:99
 export PLAYWRIGHT_BROWSERS_PATH=/data/ms-playwright
 
-echo "1. Ensuring symlinks and persistent directories..."
+echo "1. Ensuring persistent directories & symlinks..."
 mkdir -p /data/chrome_profile
 mkdir -p /data/ms-playwright
 mkdir -p /root/.local/share/notebooklm-mcp
 mkdir -p /root/.cache
 
+# Remove non-symlink /root/.cache/ms-playwright if present to avoid nested symlinks
+if [ -d "/root/.cache/ms-playwright" ] && [ ! -L "/root/.cache/ms-playwright" ]; then
+    rm -rf /root/.cache/ms-playwright
+fi
+
 ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
 ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
-# Check if patchright browser binaries exist on persistent volume /data/ms-playwright
+# Install patchright browsers if headless_shell does not exist in volume
 if [ ! -f "/data/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell" ]; then
-    echo "Downloading Patchright browser binaries into /data/ms-playwright..."
-    npx patchright install
+    echo "Downloading Patchright browsers (chromium & chromium-headless-shell) into /data/ms-playwright..."
+    npx patchright install chromium chromium-headless-shell || npx playwright install chromium chromium-headless-shell || true
+    
+    # Fallback symlink if patchright download did not populate headless_shell
     if [ ! -f "/data/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell" ]; then
         echo "Creating fallback symlink for headless_shell to system chromium..."
         mkdir -p /data/ms-playwright/chromium_headless_shell-1194/chrome-linux
