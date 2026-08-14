@@ -26,8 +26,9 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
-# Structure-independent patch for Google Rebrand (notebooklm.google.com -> notebook.google.com)
+# Structure-independent patch for Google Rebrand (notebooklm.google.com -> notebook.google.com and URL-encoded versions)
 RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
+RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm%2Egoogle%2Ecom/notebook%2Egoogle%2Ecom/g'
 
 # Single-line helper check append to src/config.ts
 RUN grep -q 'isNotebookLmUrl' src/config.ts || printf '\nexport function isNotebookLmUrl(url: string): boolean { return url.includes("notebook.google.com") || url.includes("notebooklm.google.com"); }\n' >> src/config.ts
