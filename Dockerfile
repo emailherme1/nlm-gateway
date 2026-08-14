@@ -26,20 +26,14 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
-# Replace domain
-RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
-RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm%2Egoogle%2Ecom/notebook%2Egoogle%2Ecom/g'
+# Copy patched TypeScript source files directly into cloned repo before build
+COPY src/tools/handlers.ts /app/src/tools/handlers.ts
+COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
+COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
 
-# Build project
+# Build project with patched TS source files
 RUN npm install
 RUN npm run build
-
-# Install patchright/playwright browsers into /root/.cache/ms-playwright
-RUN npx patchright install --with-deps || npx playwright install --with-deps || true
-
-# Copy and execute node patcher script on compiled dist/
-COPY patch_dist.js /app/patch_dist.js
-RUN node /app/patch_dist.js
 
 # Create directory for persistent Chrome profile
 RUN mkdir -p /data/chrome_profile
