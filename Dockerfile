@@ -26,9 +26,15 @@ WORKDIR /app
 # Clone notebooklm-mcp v2.0.0 tag
 RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 
+# Install patchright browser binaries
+RUN npx patchright install chromium chromium-headless-shell
+
 # Copy patched TypeScript source files if present or apply inline sed
 RUN grep -rl 'notebooklm\.google\.com' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm\.google\.com/notebook\.google\.com/g'
 RUN grep -rl 'notebooklm%2Egoogle%2Ecom' --include='*.ts' /app/src | xargs -r sed -i 's/notebooklm%2Egoogle%2Ecom/notebook%2Egoogle%2Ecom/g'
+
+# Unify profile path in src/config.ts to /data/chrome_profile so MCP and noVNC use the EXACT same profile
+RUN sed -i 's/paths\.data, "chrome_profile"/\"/data/chrome_profile\"/g' src/config.ts
 
 # Build project so dist/index.js exists
 RUN npm install
