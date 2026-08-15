@@ -11,5 +11,5 @@ function replaceInFile(filePath, searchStr, replaceStr) {
   }
 }
 
-// Minimal error reporting patch
-replaceInFile('/app/dist/tools/handlers.js', 'error: "Authentication failed or was cancelled"', 'error: "EXPOSED_AUTH_FAIL: " + (error ? (error.stack || error.message || String(error)) : "Unknown")');
+// Patch handlers.js for nlm diagnostic test
+replaceInFile('/app/dist/tools/handlers.js', 'stealth_enabled: CONFIG.stealthEnabled,', 'stealth_enabled: CONFIG.stealthEnabled, nlm_check: nlmCheck, nlm_list: nlmList,');
