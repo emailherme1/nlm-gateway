@@ -141,8 +141,9 @@ export class BrowserSession {
   }
 
   async waitForNotebookLMReady(): Promise<void> {
-    log.info("  ⏳ Skipping chat input wait check, proceeding directly...");
-    return;
+    if (!this.page) return;
+    await this.page.waitForLoadState("domcontentloaded");
+    await this.page.waitForTimeout(3000);
   }
 
   async ensureAuthenticated(): Promise<boolean> {
@@ -154,26 +155,22 @@ export class BrowserSession {
 
     const selectors = [
       "textarea",
-      "div[contenteditable='true']",
-      "input[type='text']",
-      "div[role='textbox']",
-      "[aria-label*='Ask']",
-      "[aria-label*='chat']",
-      "[placeholder*='Ask']",
-      ".chat-input textarea"
+      'div[contenteditable="true"]',
+      '[role="textbox"]',
+      'input[type="text"]'
     ];
 
     for (const selector of selectors) {
       try {
         const element = await this.page.$(selector);
-        if (element) {
+        if (element && (await element.isVisible())) {
           return selector;
         }
       } catch {
         continue;
       }
     }
-    return "textarea, [contenteditable='true'], input, div[role='textbox']";
+    return null;
   }
 
   async ask(question: string, sendProgress?: (msg: string, current: number, total: number) => Promise<void>): Promise<string> {
@@ -187,13 +184,18 @@ export class BrowserSession {
 
     this.updateActivity();
 
-    log.info(`  🎯 Typing question via page keyboard...`);
-    try {
+    const inputSelector = await this.findChatInput();
+    if (!inputSelector) {
+      log.warning("⚠️ Chat input element not found, attempting direct keyboard input fallback");
       await this.page.keyboard.type(question, { delay: 50 });
       await randomDelay(300, 700);
       await this.page.keyboard.press("Enter");
-    } catch (e) {
-      log.warning(`  ⚠️ Direct keyboard type failed: ${e}`);
+    } else {
+      log.info(`  🎯 Typing question into: ${inputSelector}`);
+      await this.page.focus(inputSelector);
+      await humanType(this.page, inputSelector, question);
+      await randomDelay(300, 700);
+      await this.page.keyboard.press("Enter");
     }
 
     await sendProgress?.("Waiting for response...", 3, 5);
