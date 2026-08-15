@@ -52,7 +52,11 @@ const LOW_MEMORY_FLAGS = [
   "--no-sandbox",
   "--disable-dev-shm-usage",
   "--disable-gpu",
-  "--js-flags=--max-old-space-size=512",
+  "--renderer-process-limit=1",
+  "--disable-smooth-scrolling",
+  "--disable-component-update",
+  "--disable-features=Translate,OptimizationHints,MediaRouter",
+  "--js-flags=--max-old-space-size=256",
 ];
 
 export function withChannel<T extends Record<string, unknown>>(

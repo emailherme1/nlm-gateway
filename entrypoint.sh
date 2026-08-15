@@ -49,7 +49,16 @@ node -e '
       const context = await chromium.launchPersistentContext("/data/chrome_profile", {
         executablePath: "/usr/bin/chromium",
         headless: true,
-        args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+        args: [
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--renderer-process-limit=1",
+          "--disable-smooth-scrolling",
+          "--disable-component-update",
+          "--disable-features=Translate,OptimizationHints,MediaRouter",
+          "--js-flags=--max-old-space-size=256"
+        ]
       });
       const page = await context.newPage();
       await page.goto("https://notebook.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
