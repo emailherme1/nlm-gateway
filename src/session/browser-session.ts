@@ -118,8 +118,7 @@ export class BrowserSession {
         log.success(`  ✅ Session authenticated`);
       }
 
-      log.info(`  ⏳ Waiting for NotebookLM interface...`);
-      await this.waitForNotebookLMReady();
+      log.info(`  ⏳ Skipping wait for NotebookLM interface check...`);
       this.initialized = true;
       this.updateActivity();
       log.success(`✅ Session ${this.sessionId} initialized successfully`);
