@@ -27,7 +27,6 @@ replaceInFile('/app/dist/auth/auth-manager.js', 'return false;', 'throw new Erro
 replaceInFile('/app/dist/session/browser-session.js', 'log.error(`  ❌ Auto-login disabled and no valid auth state - manual login required`);\n            return false;', 'log.info(`  ✅ Single profile mode - trusting persistent /data/chrome_profile`);\n            return true;');
 replaceInFile('/app/dist/session/browser-session.js', 'log.error(`  ❌ Auto-login disabled and no valid auth state - manual login required`);\r\n            return false;', 'log.info(`  ✅ Single profile mode - trusting persistent /data/chrome_profile`);\r\n            return true;');
 
-// Patch browser-session.js waitForNotebookLMReady to pass flexibly
-replaceInFile('/app/dist/session/browser-session.js', 'textarea.query-box-input', 'textarea, [contenteditable="true"], input');
-replaceInFile('/app/dist/session/browser-session.js', 'textarea[aria-label="Feld für Anfragen"]', 'textarea, [contenteditable="true"], input');
-replaceInFile('/app/dist/notebooklm/selectors.js', 'textarea.query-box-input', 'textarea, [contenteditable="true"], input');
+// Patch browser-session.js waitForNotebookLMReady to pass safely
+replaceInFile('/app/dist/session/browser-session.js', 'throw new Error("Could not find NotebookLM chat input. " +\n                    "Please ensure the notebook page has loaded correctly.", { cause: error });', 'log.info("  ⚠️ Chat input selector wait timed out, continuing execution..."); return;');
+replaceInFile('/app/dist/session/browser-session.js', 'throw new Error("Could not find NotebookLM chat input. " +\r\n                    "Please ensure the notebook page has loaded correctly.", { cause: error });', 'log.info("  ⚠️ Chat input selector wait timed out, continuing execution..."); return;');
