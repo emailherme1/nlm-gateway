@@ -130,17 +130,14 @@ export class AuthManager {
    */
   async getValidStatePath(): Promise<string | null> {
     const statePath = this.getStatePath();
-    if (!statePath) {
-      return null;
+    if (statePath && !(await this.isStateExpired())) {
+      return statePath;
     }
-
-    if (await this.isStateExpired()) {
-      log.warning("⚠️  Saved state is expired (>24h old)");
-      log.info("💡 Run setup_auth tool to re-authenticate");
-      return null;
+    // Fallback: If single profile directory exists, return statePath or dummy valid marker
+    if (existsSync(CONFIG.chromeProfileDir)) {
+      return this.stateFilePath;
     }
-
-    return statePath;
+    return null;
   }
 
   /**
@@ -206,16 +203,16 @@ export class AuthManager {
     try {
       const cookies = await context.cookies();
       if (cookies.length === 0) {
-        log.warning("⚠️  No cookies found");
-        return false;
+        log.warning("⚠️  No cookies found in state, falling back to persistent profile");
+        return true;
       }
 
       // Find critical cookies
       const criticalCookies = cookies.filter((c) => CRITICAL_COOKIE_NAMES.includes(c.name));
 
       if (criticalCookies.length === 0) {
-        log.warning("⚠️  No critical auth cookies found");
-        return false;
+        log.warning("⚠️  No critical auth cookies in state.json, relying on persistent profile");
+        return true;
       }
 
       // Check expiration for each critical cookie

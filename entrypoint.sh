@@ -22,31 +22,7 @@ ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
 echo "2. (desktop Xvfb/fluxbox/x11vnc/websockify DISABLED to free maximum RAM)"
 
-echo "3. Exporting storageState from persistent profile to state.json..."
-node -e '
-(async () => {
-  const { chromium } = require("patchright");
-  try {
-    const context = await chromium.launchPersistentContext("/data/chrome_profile", {
-      executablePath: "/usr/bin/chromium",
-      headless: true,
-      args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
-    });
-    const page = context.pages()[0] || await context.newPage();
-    await page.goto("https://myaccount.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
-    await page.waitForTimeout(2000);
-    await page.goto("https://notebooklm.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
-    await page.waitForTimeout(3000);
-    await context.storageState({ path: "/data/browser_state/state.json" });
-    await context.close();
-    console.log("STATE_DUMP_SUCCESS");
-  } catch (e) {
-    console.error("STATE_DUMP_ERROR:", e.message);
-  }
-})();
-'
-
-echo "4. Starting NotebookLM MCP HTTP Server on port 3000..."
+echo "3. Starting NotebookLM MCP HTTP Server on port 3000..."
 node dist/index.js --transport http --port 3000 --host 0.0.0.0 &
 sleep 1
 
