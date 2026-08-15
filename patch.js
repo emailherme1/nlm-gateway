@@ -28,6 +28,6 @@ replaceInFile('/app/dist/session/browser-session.js', 'log.error(`  ❌ Auto-log
 replaceInFile('/app/dist/session/browser-session.js', 'log.error(`  ❌ Auto-login disabled and no valid auth state - manual login required`);\r\n            return false;', 'log.info(`  ✅ Single profile mode - trusting persistent /data/chrome_profile`);\r\n            return true;');
 
 // Patch browser-session.js selectors for NotebookLM chat input
-replaceInFile('/app/dist/session/browser-session.js', 'throw new Error("Could not find NotebookLM chat input.', 'console.log("BYPASS_CHAT_INPUT_ERROR"); //');
-replaceInFile('/app/dist/session/browser-session.js', 'throw new Error("Could not find visible chat input element.', 'console.log("BYPASS_VISIBLE_INPUT_ERROR"); //');
+replaceInFile('/app/dist/session/browser-session.js', 'Could not find NotebookLM chat input', 'BYPASS_CHAT_INPUT_NOT_FOUND');
+replaceInFile('/app/dist/session/browser-session.js', 'Could not find visible chat input element', 'BYPASS_VISIBLE_INPUT_NOT_FOUND');
 replaceInFile('/app/dist/session/browser-session.js', '"textarea.query-box-input"', '"textarea, div[contenteditable=\\"true\\"], input"');
