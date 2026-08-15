@@ -52,7 +52,6 @@ const LOW_MEMORY_FLAGS = [
   "--no-sandbox",
   "--disable-dev-shm-usage",
   "--disable-gpu",
-  "--single-process",
   "--no-zygote",
   "--renderer-process-limit=1",
   "--disable-smooth-scrolling",
