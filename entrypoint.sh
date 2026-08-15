@@ -20,12 +20,7 @@ ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
 ln -sf /data/browser_state /root/.local/share/notebooklm-mcp/browser_state
 ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
-echo "2. Starting desktop GUI daemons (Xvfb, Fluxbox, x11vnc, websockify/noVNC)..."
-Xvfb :99 -screen 0 1280x1024x24 &
-sleep 1
-fluxbox &
-x11vnc -forever -shared -rfbport 5900 -display :99 -nopw &
-/usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 8080 &
+echo "2. (desktop Xvfb/fluxbox/x11vnc/websockify DISABLED to free maximum RAM)"
 
 echo "3. Exporting storageState from persistent profile if state.json is missing..."
 node -e '
