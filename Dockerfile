@@ -32,6 +32,7 @@ RUN git clone -b v2.0.0 https://github.com/PleasePrompto/notebooklm-mcp.git .
 COPY src/config.ts /app/src/config.ts
 COPY src/auth/auth-manager.ts /app/src/auth/auth-manager.ts
 COPY src/session/shared-context-manager.ts /app/src/session/shared-context-manager.ts
+COPY src/session/browser-session.ts /app/src/session/browser-session.ts
 COPY src/browser/chromium-fallback.ts /app/src/browser/chromium-fallback.ts
 COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 
