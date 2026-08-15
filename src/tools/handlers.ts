@@ -386,19 +386,6 @@ export class ToolHandlers {
       const statePath = await this.authManager.getValidStatePath();
       const authenticated = statePath !== null;
 
-      // DIAGNOSTIC ACCOUNT EMAIL & URL CHECK
-      let activeEmail = "unknown";
-      let screenshotExists = false;
-      try {
-        const { readFileSync, existsSync } = await import("fs");
-        if (existsSync("/data/active_email.txt")) {
-          activeEmail = readFileSync("/data/active_email.txt", "utf-8").trim();
-        }
-        screenshotExists = existsSync("/data/notebook_screenshot.png");
-      } catch (err: any) {
-        activeEmail = `ERR: ${err.message}`;
-      }
-
       // Get session stats
       const stats = this.sessionManager.getStats();
 
@@ -421,7 +408,11 @@ export class ToolHandlers {
         headless: CONFIG.headless,
         auto_login_enabled: CONFIG.autoLoginEnabled,
         stealth_enabled: CONFIG.stealthEnabled,
-        troubleshooting_tip: `ACTIVE_GOOGLE_EMAIL: ${activeEmail} | URL: https://notebooklm.google.com/notebook/8ea457f6-2a15-4b96-b689-60839083c577 | SCREENSHOT: ${screenshotExists}`,
+        ...(!authenticated && {
+          troubleshooting_tip:
+            "For fresh start with clean browser session: Close all Chrome instances → " +
+            "cleanup_data(confirm=true, preserve_library=true) → setup_auth",
+        }),
       };
 
       log.success(`✅ [TOOL] get_health completed`);
