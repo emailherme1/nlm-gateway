@@ -12,5 +12,5 @@ function replaceInFile(filePath, searchStr, replaceStr) {
 }
 
 // Patch handlers.js for Ground Truth Diagnostic Test
+replaceInFile('/app/dist/tools/handlers.js', 'troubleshooting_tip: "For fresh start', 'troubleshooting_tip: "PERSIAN_CONTENT: " + debugText, tip: "For fresh start');
 replaceInFile('/app/dist/tools/handlers.js', 'authenticated,', 'authenticated, ground_truth: true,');
-replaceInFile('/app/dist/tools/handlers.js', 'status: "ok",', 'status: "ok", ground_truth: true,');

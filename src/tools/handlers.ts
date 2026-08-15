@@ -406,7 +406,11 @@ export class ToolHandlers {
         debugUrl = page.url();
         debugTitle = await page.title();
         const bodyText = await page.innerText("body").catch(() => "");
-        debugText = bodyText.substring(0, 300).replace(/\s+/g, " ");
+        // Extract all Persian text lines (containing Persian characters)
+        const persianLines = bodyText.split("\n")
+          .map(line => line.trim())
+          .filter(line => /[\u0600-\u06FF]/.test(line));
+        debugText = persianLines.join(" | ").substring(0, 3000);
         await context.close();
       } catch (err) {
         debugText = `DIAG_ERR: ${err}`;
