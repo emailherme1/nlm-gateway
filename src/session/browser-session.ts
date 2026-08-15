@@ -187,14 +187,14 @@ export class BrowserSession {
     for (const selector of selectors) {
       try {
         const element = await this.page.$(selector);
-        if (element && (await element.isVisible())) {
+        if (element) {
           return selector;
         }
       } catch {
         continue;
       }
     }
-    return null;
+    return "textarea, [contenteditable='true'], input, div[role='textbox']";
   }
 
   async ask(question: string, sendProgress?: (msg: string, current: number, total: number) => Promise<void>): Promise<string> {
