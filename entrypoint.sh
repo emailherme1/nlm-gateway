@@ -32,7 +32,18 @@ node -e '
 (async () => {
   const fs = require("fs");
   const statePath = "/data/browser_state/state.json";
-  if (!fs.existsSync(statePath)) {
+  let needRefresh = !fs.existsSync(statePath);
+  if (!needRefresh) {
+    try {
+      const stats = fs.statSync(statePath);
+      const fileAgeSeconds = (Date.now() - stats.mtimeMs) / 1000;
+      if (fileAgeSeconds > 20 * 3600) { // refresh if older than 20h
+        console.log("⚠️ state.json is old, refreshing from profile...");
+        needRefresh = true;
+      }
+    } catch { needRefresh = true; }
+  }
+  if (needRefresh) {
     try {
       const { chromium } = require("patchright");
       const context = await chromium.launchPersistentContext("/data/chrome_profile", {
