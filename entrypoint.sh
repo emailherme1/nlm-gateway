@@ -20,7 +20,39 @@ ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
 ln -sf /data/browser_state /root/.local/share/notebooklm-mcp/browser_state
 ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
-echo "2. (desktop Xvfb/fluxbox/x11vnc/websockify DISABLED to free maximum RAM)"
+echo "2. Syncing cookies from /data/chrome_profile for nlm CLI..."
+python3 -c '
+import sqlite3, json, glob, os
+from notebooklm_tools.core.auth import AuthManager
+
+dbs = glob.glob("/data/chrome_profile/**/Cookies", recursive=True) + glob.glob("/data/chrome_profile/**/Network/Cookies", recursive=True)
+cookies = []
+for db in dbs:
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+        c.execute("SELECT host_key, name, value, path, expires_utc, is_secure, is_httponly FROM cookies WHERE host_key LIKE \"%google%\"")
+        for row in c.fetchall():
+            cookies.append({
+                "domain": row[0],
+                "name": row[1],
+                "value": row[2],
+                "path": row[3],
+                "expires": row[4],
+                "secure": bool(row[5]),
+                "httpOnly": bool(row[6])
+            })
+        conn.close()
+    except Exception as e:
+        print("Cookie read error:", e)
+
+if cookies:
+    am = AuthManager("default")
+    am.save_profile(cookies=cookies, force=True)
+    print("✅ nlm profile synced successfully with", len(cookies), "cookies!")
+else:
+    print("⚠️ No cookies found in /data/chrome_profile")
+' || true
 
 echo "3. Starting NotebookLM MCP HTTP Server on port 3000..."
 node dist/index.js --transport http --port 3000 --host 0.0.0.0 &
