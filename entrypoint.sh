@@ -58,6 +58,15 @@ const fs = require("fs");
 if [ -f /data/cookies.txt ]; then
   echo "Importing /data/cookies.txt into nlm..."
   nlm login --manual --file /data/cookies.txt --force || true
+  
+  echo "=== ZERO-MOCK VERIFICATION STEP 1: ADD SOURCE ==="
+  nlm source add 8ea457f6-2a15-4b96-b689-60839083c577 --title "VERIFY-SOURCE-8841" --text "کد امنیتی تایید هویت سیستم هرمس برابر است با: SECRET-KEY-994421" --wait || true
+  
+  echo "=== ZERO-MOCK VERIFICATION STEP 2: QUERY SECRET KEY ==="
+  nlm notebook query 8ea457f6-2a15-4b96-b689-60839083c577 "کد امنیتی تایید هویت هرمس (SECRET-KEY) چیست؟" || true
+  
+  echo "=== ZERO-MOCK VERIFICATION STEP 3: SOURCE LIST ==="
+  nlm source list 8ea457f6-2a15-4b96-b689-60839083c577 || true
 fi
 
 echo "3. Starting NotebookLM MCP HTTP Server on port 3000..."
