@@ -40,6 +40,8 @@ node -e '
         headless: true,
         args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
       });
+      const page = await context.newPage();
+      await page.goto("https://notebook.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
       await context.storageState({ path: statePath });
       await context.close();
       console.log("✅ Dumped state.json from persistent profile!");
