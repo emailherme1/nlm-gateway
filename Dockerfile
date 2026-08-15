@@ -43,6 +43,7 @@ COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 # Install node dependencies & build project
 RUN npm install
 RUN npm run build
+RUN cp src/tools/handlers.ts dist/tools/handlers.ts || true
 
 # Run runtime patches for persistent single-profile auth fallback
 COPY patch.js /app/patch.js
