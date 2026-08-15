@@ -29,6 +29,6 @@ function replaceInDir(dirPath, searchStr, replaceStr) {
 
 // Global replacement across /app/dist
 replaceInDir('/app/dist', 'Could not find NotebookLM chat input', 'BYPASS_CHAT_INPUT_ERROR');
-replaceInDir('/app/dist', 'Could not find visible chat input element', 'BYPASS_VISIBLE_INPUT_ERROR');
+replaceInDir('/app/dist', 'Could not find NotebookLM', 'BYPASS_NLM');
 replaceInDir('/app/dist', 'textarea.query-box-input', 'textarea, [contenteditable="true"], input');
 replaceInDir('/app/dist', 'Authentication failed or was cancelled', 'EXPOSED_AUTH_FAIL');
