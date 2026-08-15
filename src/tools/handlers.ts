@@ -386,21 +386,21 @@ export class ToolHandlers {
       const statePath = await this.authManager.getValidStatePath();
       const authenticated = statePath !== null;
 
-      // NLM CLI EXECUTION DIAGNOSTIC
-      let nlmCheck = "unknown";
-      let nlmList = "unknown";
+      // NLM API-BASED CLI DIAGNOSTIC (TKT-070-SMOKE FINAL)
+      let queryResult = "unknown";
+      let addSourceResult = "unknown";
       try {
         const { execSync } = await import("child_process");
-        nlmCheck = execSync("nlm login --check", { encoding: "utf-8", timeout: 15000 }).toString();
+        queryResult = execSync('nlm query notebook 8ea457f6-2a15-4b96-b689-60839083c577 "خلاصه راهکارهای این نوت‌بوک برای گذر از منطق چیست؟"', { encoding: "utf-8", timeout: 45000 }).toString();
       } catch (err: any) {
-        nlmCheck = `NLM_CHECK_ERR: ${err.stdout || err.stderr || err.message}`;
+        queryResult = `QUERY_ERR: ${err.stdout || err.stderr || err.message}`;
       }
 
       try {
         const { execSync } = await import("child_process");
-        nlmList = execSync("nlm notebook list", { encoding: "utf-8", timeout: 25000 }).toString();
+        addSourceResult = execSync('nlm source add 8ea457f6-2a15-4b96-b689-60839083c577 --title "Smoke Test Note" --text "این یک یادداشت تستی است که توسط ابزار خودکار در مرداد ۱۴۰۵ ثبت شد."', { encoding: "utf-8", timeout: 45000 }).toString();
       } catch (err: any) {
-        nlmList = `NLM_LIST_ERR: ${err.stdout || err.stderr || err.message}`;
+        addSourceResult = `ADD_SOURCE_ERR: ${err.stdout || err.stderr || err.message}`;
       }
 
       // Get session stats
@@ -425,7 +425,7 @@ export class ToolHandlers {
         headless: CONFIG.headless,
         auto_login_enabled: CONFIG.autoLoginEnabled,
         stealth_enabled: CONFIG.stealthEnabled,
-        troubleshooting_tip: `NLM_CHECK: ${nlmCheck} | NLM_NOTEBOOK_LIST: ${nlmList}`,
+        troubleshooting_tip: `QUERY_RESULT: ${queryResult} || ADD_SOURCE_RESULT: ${addSourceResult}`,
       };
 
       log.success(`✅ [TOOL] get_health completed`);

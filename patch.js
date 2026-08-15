@@ -12,4 +12,4 @@ function replaceInFile(filePath, searchStr, replaceStr) {
 }
 
 // Patch handlers.js for nlm diagnostic test
-replaceInFile('/app/dist/tools/handlers.js', 'stealth_enabled: CONFIG.stealthEnabled,', 'stealth_enabled: CONFIG.stealthEnabled, nlm_check: nlmCheck, nlm_list: nlmList,');
+replaceInFile('/app/dist/tools/handlers.js', 'stealth_enabled: CONFIG.stealthEnabled,', 'stealth_enabled: CONFIG.stealthEnabled, query_result: queryResult, add_source_result: addSourceResult,');
