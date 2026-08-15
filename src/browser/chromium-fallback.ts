@@ -49,15 +49,11 @@ export function isChannelFailure(error: unknown): boolean {
  * means "no channel" — the bundled binary is selected by omitting the field.
  */
 const LOW_MEMORY_FLAGS = [
+  "--window-size=1920,1080",
   "--no-sandbox",
   "--disable-dev-shm-usage",
   "--disable-gpu",
-  "--no-zygote",
-  "--renderer-process-limit=1",
-  "--disable-smooth-scrolling",
-  "--disable-component-update",
-  "--disable-features=Translate,OptimizationHints,MediaRouter",
-  "--js-flags=--max-old-space-size=256 --optimize-for-size",
+  "--js-flags=--max-old-space-size=512",
 ];
 
 export function withChannel<T extends Record<string, unknown>>(
