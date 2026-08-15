@@ -22,49 +22,23 @@ ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
 echo "2. (desktop Xvfb/fluxbox/x11vnc/websockify DISABLED to free maximum RAM)"
 
-echo "3. Exporting storageState from persistent profile if state.json is missing..."
+echo "3. Exporting storageState from persistent profile to state.json..."
 node -e '
 (async () => {
-  const fs = require("fs");
-  const statePath = "/data/browser_state/state.json";
-  let needRefresh = !fs.existsSync(statePath);
-  if (!needRefresh) {
-    try {
-      const stats = fs.statSync(statePath);
-      const fileAgeSeconds = (Date.now() - stats.mtimeMs) / 1000;
-      if (fileAgeSeconds > 20 * 3600) { // refresh if older than 20h
-        console.log("⚠️ state.json is old, refreshing from profile...");
-        needRefresh = true;
-      }
-    } catch { needRefresh = true; }
-  }
-  if (needRefresh) {
-    try {
-      const { chromium } = require("patchright");
-      const context = await chromium.launchPersistentContext("/data/chrome_profile", {
-        executablePath: "/usr/bin/chromium",
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-          "--no-zygote",
-          "--renderer-process-limit=1",
-          "--disable-smooth-scrolling",
-          "--disable-component-update",
-          "--disable-features=Translate,OptimizationHints,MediaRouter",
-          "--js-flags=--max-old-space-size=256 --optimize-for-size"
-        ]
-      });
-      const page = await context.newPage();
-      await page.goto("https://notebook.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
-      await page.waitForTimeout(5000);
-      await context.storageState({ path: statePath });
-      await context.close();
-      console.log("✅ Dumped state.json from persistent profile!");
-    } catch (e) {
-      console.error("❌ Could not dump state.json:", e.message);
-    }
+  const { chromium } = require("patchright");
+  try {
+    const context = await chromium.launchPersistentContext("/data/chrome_profile", {
+      executablePath: "/usr/bin/chromium",
+      headless: true,
+      args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+    });
+    const page = context.pages()[0] || await context.newPage();
+    await page.goto("https://notebooklm.google.com", { waitUntil: "networkidle", timeout: 45000 });
+    await context.storageState({ path: "/data/browser_state/state.json" });
+    await context.close();
+    console.log("STATE_DUMP_SUCCESS");
+  } catch (e) {
+    console.error("STATE_DUMP_ERROR:", e.message);
   }
 })();
 '
