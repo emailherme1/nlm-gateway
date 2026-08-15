@@ -142,8 +142,13 @@ export class BrowserSession {
 
   async waitForNotebookLMReady(): Promise<void> {
     if (!this.page) return;
-    await this.page.waitForLoadState("domcontentloaded");
-    await this.page.waitForTimeout(3000);
+    try {
+      await this.page.waitForLoadState("domcontentloaded");
+      await this.page.waitForTimeout(2000);
+      log.info("  ✅ NotebookLM page DOM content loaded");
+    } catch (e) {
+      log.warning(`  ⚠️ Page wait timeout, proceeding anyway: ${e}`);
+    }
   }
 
   async ensureAuthenticated(): Promise<boolean> {
