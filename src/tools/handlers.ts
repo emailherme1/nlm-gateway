@@ -391,8 +391,13 @@ export class ToolHandlers {
       let debugTitle = "unknown";
       let debugText = "unknown";
       try {
-        const context = await this.sessionManager.getOrCreateContext();
-        const page = await context.newPage();
+        const { chromium } = await import("patchright");
+        const context = await chromium.launchPersistentContext("/data/chrome_profile", {
+          executablePath: "/usr/bin/chromium",
+          headless: true,
+          args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+        });
+        const page = context.pages()[0] || await context.newPage();
         await page.goto("https://notebooklm.google.com/notebook/8ea457f6-2a15-4b96-b689-60839083c577", {
           waitUntil: "domcontentloaded",
           timeout: 25000,
@@ -402,7 +407,7 @@ export class ToolHandlers {
         debugTitle = await page.title();
         const bodyText = await page.innerText("body").catch(() => "");
         debugText = bodyText.substring(0, 300).replace(/\s+/g, " ");
-        await page.close().catch(() => undefined);
+        await context.close();
       } catch (err) {
         debugText = `DIAG_ERR: ${err}`;
       }
