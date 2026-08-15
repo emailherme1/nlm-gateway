@@ -11,7 +11,7 @@ mkdir -p /data/ms-playwright
 mkdir -p /root/.local/share/notebooklm-mcp
 mkdir -p /root/.cache
 
-# Kill any stale chromium or chrome process that holds the lock
+# Kill any standalone chromium/chrome process holding locks for interactive login
 pkill -9 chromium || true
 pkill -9 chrome || true
 rm -rf /data/chrome_profile/Singleton* 2>/dev/null || true
@@ -27,10 +27,7 @@ fluxbox &
 x11vnc -forever -shared -rfbport 5900 -display :99 -nopw &
 /usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 8080 &
 
-echo "3. Spawning Chromium GUI on :99 for interactive Google login..."
-/usr/bin/chromium --no-sandbox --user-data-dir=/data/chrome_profile --display=:99 https://accounts.google.com &
-
-echo "4. Starting NotebookLM MCP HTTP Server on port 3000..."
+echo "3. Starting NotebookLM MCP HTTP Server on port 3000..."
 node dist/index.js --transport http --port 3000 --host 0.0.0.0 &
 sleep 1
 
