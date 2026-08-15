@@ -27,7 +27,30 @@ fluxbox &
 x11vnc -forever -shared -rfbport 5900 -display :99 -nopw &
 /usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 8080 &
 
-echo "3. Starting NotebookLM MCP HTTP Server on port 3000..."
+echo "3. Exporting storageState from persistent profile if state.json is missing..."
+node -e '
+(async () => {
+  const fs = require("fs");
+  const statePath = "/data/browser_state/state.json";
+  if (!fs.existsSync(statePath)) {
+    try {
+      const { chromium } = require("patchright");
+      const context = await chromium.launchPersistentContext("/data/chrome_profile", {
+        executablePath: "/usr/bin/chromium",
+        headless: true,
+        args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+      });
+      await context.storageState({ path: statePath });
+      await context.close();
+      console.log("✅ Dumped state.json from persistent profile!");
+    } catch (e) {
+      console.error("❌ Could not dump state.json:", e.message);
+    }
+  }
+})();
+'
+
+echo "4. Starting NotebookLM MCP HTTP Server on port 3000..."
 node dist/index.js --transport http --port 3000 --host 0.0.0.0 &
 sleep 1
 
