@@ -56,7 +56,8 @@ node -e '
         ]
       });
       const page = await context.newPage();
-      await page.goto("https://notebook.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
+      await page.goto("https://notebook.google.com/", { waitUntil: "networkidle", timeout: 45000 });
+      await page.waitForTimeout(3000);
       await context.storageState({ path: statePath });
       await context.close();
       console.log("✅ Dumped state.json from persistent profile!");
