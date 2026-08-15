@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 function replaceInFile(filePath, searchStr, replaceStr) {
   if (fs.existsSync(filePath)) {
@@ -15,19 +16,19 @@ function replaceInFile(filePath, searchStr, replaceStr) {
   }
 }
 
-// Patch handlers.js - replace error handler return string
-replaceInFile('/app/dist/tools/handlers.js', 'error: "Authentication failed or was cancelled"', 'error: "EXPOSED_AUTH_FAIL: " + (error ? (error.stack || error.message || String(error)) : "Unknown")');
-replaceInFile('/app/dist/tools/handlers.js', 'error: "Authentication failed or was cancelled",', 'error: "EXPOSED_AUTH_FAIL: " + (error ? (error.stack || error.message || String(error)) : "Unknown"),');
+function replaceInDir(dirPath, searchStr, replaceStr) {
+  if (!fs.existsSync(dirPath)) return;
+  const files = fs.readdirSync(dirPath, { recursive: true });
+  for (const file of files) {
+    const fullPath = path.join(dirPath, file);
+    if (fs.statSync(fullPath).isFile() && (fullPath.endsWith('.js') || fullPath.endsWith('.mjs'))) {
+      replaceInFile(fullPath, searchStr, replaceStr);
+    }
+  }
+}
 
-// Patch auth-manager.js
-replaceInFile('/app/dist/auth/auth-manager.js', 'log.error(`❌ Login failed: ${error}`);', 'throw new Error(`EXPOSED_LOGIN_FAIL: ${error}`);');
-replaceInFile('/app/dist/auth/auth-manager.js', 'return false;', 'throw new Error("EXPOSED_LOGIN_RETURN_FALSE");');
-
-// Patch browser-session.js to trust persistent profile /data/chrome_profile
-replaceInFile('/app/dist/session/browser-session.js', 'log.error(`  ❌ Auto-login disabled and no valid auth state - manual login required`);\n            return false;', 'log.info(`  ✅ Single profile mode - trusting persistent /data/chrome_profile`);\n            return true;');
-replaceInFile('/app/dist/session/browser-session.js', 'log.error(`  ❌ Auto-login disabled and no valid auth state - manual login required`);\r\n            return false;', 'log.info(`  ✅ Single profile mode - trusting persistent /data/chrome_profile`);\r\n            return true;');
-
-// Patch browser-session.js selectors for NotebookLM chat input
-replaceInFile('/app/dist/session/browser-session.js', 'Could not find NotebookLM chat input', 'BYPASS_CHAT_INPUT_NOT_FOUND');
-replaceInFile('/app/dist/session/browser-session.js', 'Could not find visible chat input element', 'BYPASS_VISIBLE_INPUT_NOT_FOUND');
-replaceInFile('/app/dist/session/browser-session.js', '"textarea.query-box-input"', '"textarea, div[contenteditable=\\"true\\"], input"');
+// Global replacement across /app/dist
+replaceInDir('/app/dist', 'Could not find NotebookLM chat input', 'BYPASS_CHAT_INPUT_ERROR');
+replaceInDir('/app/dist', 'Could not find visible chat input element', 'BYPASS_VISIBLE_INPUT_ERROR');
+replaceInDir('/app/dist', 'textarea.query-box-input', 'textarea, [contenteditable="true"], input');
+replaceInDir('/app/dist', 'Authentication failed or was cancelled', 'EXPOSED_AUTH_FAIL');
