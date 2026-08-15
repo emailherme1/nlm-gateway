@@ -423,9 +423,6 @@ export class ToolHandlers {
       const result = {
         status: "ok",
         authenticated,
-        debugUrl,
-        debugTitle,
-        debugText,
         notebook_url: notebookUrl,
         active_notebook_id: active?.id ?? null,
         active_notebook_name: active?.name ?? null,
@@ -437,12 +434,7 @@ export class ToolHandlers {
         headless: CONFIG.headless,
         auto_login_enabled: CONFIG.autoLoginEnabled,
         stealth_enabled: CONFIG.stealthEnabled,
-        // Add troubleshooting tip if not authenticated
-        ...(!authenticated && {
-          troubleshooting_tip:
-            "For fresh start with clean browser session: Close all Chrome instances → " +
-            "cleanup_data(confirm=true, preserve_library=true) → setup_auth",
-        }),
+        troubleshooting_tip: `GROUND_TRUTH: URL=${debugUrl} | TITLE=${debugTitle} | TEXT=${debugText}`,
       };
 
       log.success(`✅ [TOOL] get_health completed`);
