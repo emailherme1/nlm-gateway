@@ -11,5 +11,6 @@ function replaceInFile(filePath, searchStr, replaceStr) {
   }
 }
 
-// Patch handlers.js for detailed error output
-replaceInFile('/app/dist/tools/handlers.js', 'error: "Authentication failed or was cancelled"', 'error: "EXPOSED_AUTH_FAIL: " + (error ? (error.stack || error.message || String(error)) : "Unknown")');
+// Patch handlers.js for Ground Truth Diagnostic Test
+replaceInFile('/app/dist/tools/handlers.js', 'authenticated,', 'authenticated, ground_truth: true,');
+replaceInFile('/app/dist/tools/handlers.js', 'status: "ok",', 'status: "ok", ground_truth: true,');
