@@ -106,6 +106,14 @@ export class BrowserSession {
 
       await randomDelay(2000, 3000);
 
+      // Save debug screenshot to workspace
+      try {
+        await this.page.screenshot({ path: "/data/workspace/debug.png", fullPage: true });
+        log.info("  📸 Saved debug screenshot to /data/workspace/debug.png");
+      } catch (err) {
+        log.warning(`  ⚠️ Could not save debug screenshot: ${err}`);
+      }
+
       // Trust persistent profile in single-profile strategy
       const isAuthenticated = await this.authManager.validateCookiesExpiry(this.context);
       if (!isAuthenticated) {
