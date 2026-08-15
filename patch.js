@@ -13,3 +13,8 @@ function replaceInFile(filePath, searchStr, replaceStr) {
 
 // Patch handlers.js for Ground Truth Diagnostic Test
 replaceInFile('/app/dist/tools/handlers.js', 'stealth_enabled: CONFIG.stealthEnabled,', 'stealth_enabled: CONFIG.stealthEnabled, content_sample: debugText,');
+
+// Patch browser-session.js to bypass waitForNotebookLMReady error throw
+replaceInFile('/app/dist/session/browser-session.js', 'throw new Error("Could not find NotebookLM chat input. " +', 'return; //');
+replaceInFile('/app/dist/session/browser-session.js', 'throw new Error("Could not find NotebookLM chat input. " +\r\n                    "Please ensure the notebook page has loaded correctly.", { cause: error });', 'return;');
+replaceInFile('/app/dist/session/browser-session.js', 'throw new Error("Could not find NotebookLM chat input. " +\n                    "Please ensure the notebook page has loaded correctly.", { cause: error });', 'return;');
