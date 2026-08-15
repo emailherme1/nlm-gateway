@@ -250,6 +250,21 @@ export class SharedContextManager {
     }
     this.contextCreatedAt = Date.now();
     this.currentHeadlessMode = shouldBeHeadless;
+
+    // Request Interception to block heavy resources (images, fonts, media) and save RAM
+    try {
+      await this.globalContext.route("**/*", (route) => {
+        const type = route.request().resourceType();
+        if (["image", "font", "media"].includes(type)) {
+          return route.abort();
+        }
+        return route.continue();
+      });
+      log.info("  ⚡ Request Interception enabled (blocked images, fonts, media for RAM optimization)");
+    } catch (err) {
+      log.warning(`  ⚠️ Could not attach route interception: ${err}`);
+    }
+
     // Track close event to force recreation next time
     try {
       this.globalContext.on("close", () => {
