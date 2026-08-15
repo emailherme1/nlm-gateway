@@ -386,34 +386,21 @@ export class ToolHandlers {
       const statePath = await this.authManager.getValidStatePath();
       const authenticated = statePath !== null;
 
-      // GROUND TRUTH DIAGNOSTIC TEST
-      let debugUrl = "unknown";
-      let debugTitle = "unknown";
-      let debugText = "unknown";
+      // NLM CLI EXECUTION DIAGNOSTIC
+      let nlmCheck = "unknown";
+      let nlmList = "unknown";
       try {
-        const { chromium } = await import("patchright");
-        const context = await chromium.launchPersistentContext("/data/chrome_profile", {
-          executablePath: "/usr/bin/chromium",
-          headless: true,
-          args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
-        });
-        const page = context.pages()[0] || await context.newPage();
-        await page.goto("https://notebooklm.google.com/notebook/8ea457f6-2a15-4b96-b689-60839083c577", {
-          waitUntil: "domcontentloaded",
-          timeout: 25000,
-        });
-        await new Promise((r) => setTimeout(r, 5000));
-        debugUrl = page.url();
-        debugTitle = await page.title();
-        const bodyText = await page.innerText("body").catch(() => "");
-        // Extract all Persian text lines (containing Persian characters)
-        const persianLines = bodyText.split("\n")
-          .map(line => line.trim())
-          .filter(line => /[\u0600-\u06FF]/.test(line));
-        debugText = persianLines.join(" | ").substring(0, 3000);
-        await context.close();
-      } catch (err) {
-        debugText = `DIAG_ERR: ${err}`;
+        const { execSync } = await import("child_process");
+        nlmCheck = execSync("nlm login --check", { encoding: "utf-8", timeout: 15000 }).toString();
+      } catch (err: any) {
+        nlmCheck = `NLM_CHECK_ERR: ${err.stdout || err.stderr || err.message}`;
+      }
+
+      try {
+        const { execSync } = await import("child_process");
+        nlmList = execSync("nlm notebook list", { encoding: "utf-8", timeout: 25000 }).toString();
+      } catch (err: any) {
+        nlmList = `NLM_LIST_ERR: ${err.stdout || err.stderr || err.message}`;
       }
 
       // Get session stats
@@ -438,7 +425,7 @@ export class ToolHandlers {
         headless: CONFIG.headless,
         auto_login_enabled: CONFIG.autoLoginEnabled,
         stealth_enabled: CONFIG.stealthEnabled,
-        troubleshooting_tip: `GROUND_TRUTH: URL=${debugUrl} | TITLE=${debugTitle} | TEXT=${debugText}`,
+        troubleshooting_tip: `NLM_CHECK: ${nlmCheck} | NLM_NOTEBOOK_LIST: ${nlmList}`,
       };
 
       log.success(`✅ [TOOL] get_health completed`);
