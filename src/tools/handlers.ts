@@ -207,9 +207,10 @@ export class ToolHandlers {
       }
 
       log.error(`❌ [TOOL] ask_question failed: ${errorMessage}`);
+      const detailedMsg = error instanceof Error ? (error.stack || error.message) : String(error);
       return {
         success: false,
-        error: errorMessage,
+        error: detailedMsg,
       };
     }
   }
