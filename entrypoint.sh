@@ -20,7 +20,7 @@ ln -sf /data/chrome_profile /root/.local/share/notebooklm-mcp/chrome_profile
 ln -sf /data/browser_state /root/.local/share/notebooklm-mcp/browser_state
 ln -sf /data/ms-playwright /root/.cache/ms-playwright
 
-echo "2. Extracting Netscape cookies from /data/chrome_profile for nlm CLI..."
+echo "2. Extracting Netscape cookies & checking Google user account email..."
 node -e '
 const { chromium } = require("patchright");
 const fs = require("fs");
@@ -33,6 +33,21 @@ const fs = require("fs");
       args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
     });
     
+    const page = context.pages()[0] || await context.newPage();
+    await page.goto("https://myaccount.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.waitForTimeout(2000);
+    
+    const pageText = await page.innerText("body").catch(() => "");
+    const emailMatch = pageText.match(/[a-zA-Z0-9._%+-]+@gmail\.com/i) || pageText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i);
+    const activeEmail = emailMatch ? emailMatch[0] : "UNKNOWN_EMAIL";
+    console.log("=== ACTIVE GOOGLE USER EMAIL ===", activeEmail);
+    fs.writeFileSync("/data/active_email.txt", activeEmail);
+
+    await page.goto("https://notebooklm.google.com/notebook/8ea457f6-2a15-4b96-b689-60839083c577", { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.waitForTimeout(3000);
+    await page.screenshot({ path: "/data/notebook_screenshot.png", fullPage: true }).catch(() => undefined);
+    console.log("=== SCREENSHOT SAVED AT /data/notebook_screenshot.png ===");
+
     const cookies = await context.cookies(["https://google.com", "https://notebooklm.google.com", "https://accounts.google.com"]);
     console.log("Extracted cookies count via Patchright:", cookies.length);
     

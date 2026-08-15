@@ -386,29 +386,17 @@ export class ToolHandlers {
       const statePath = await this.authManager.getValidStatePath();
       const authenticated = statePath !== null;
 
-      // ZERO-MOCK VERIFICATION DIAGNOSTIC
-      let verifyStep1 = "unknown";
-      let verifyStep2 = "unknown";
-      let verifyStep3 = "unknown";
+      // DIAGNOSTIC ACCOUNT EMAIL & URL CHECK
+      let activeEmail = "unknown";
+      let screenshotExists = false;
       try {
-        const { execSync } = await import("child_process");
-        verifyStep1 = execSync('nlm source add 8ea457f6-2a15-4b96-b689-60839083c577 --title "VERIFY-SOURCE-8841" --text "کد امنیتی تایید هویت سیستم هرمس برابر است با: SECRET-KEY-994421" --wait', { encoding: "utf-8", timeout: 60000 }).toString();
+        const { readFileSync, existsSync } = await import("fs");
+        if (existsSync("/data/active_email.txt")) {
+          activeEmail = readFileSync("/data/active_email.txt", "utf-8").trim();
+        }
+        screenshotExists = existsSync("/data/notebook_screenshot.png");
       } catch (err: any) {
-        verifyStep1 = `ADD_ERR: ${err.stdout || err.stderr || err.message}`;
-      }
-
-      try {
-        const { execSync } = await import("child_process");
-        verifyStep2 = execSync('nlm query notebook 8ea457f6-2a15-4b96-b689-60839083c577 "کد امنیتی تایید هویت هرمس (SECRET-KEY) چیست؟"', { encoding: "utf-8", timeout: 60000 }).toString();
-      } catch (err: any) {
-        verifyStep2 = `QUERY_ERR: ${err.stdout || err.stderr || err.message}`;
-      }
-
-      try {
-        const { execSync } = await import("child_process");
-        verifyStep3 = execSync('nlm source list 8ea457f6-2a15-4b96-b689-60839083c577', { encoding: "utf-8", timeout: 30000 }).toString();
-      } catch (err: any) {
-        verifyStep3 = `LIST_ERR: ${err.stdout || err.stderr || err.message}`;
+        activeEmail = `ERR: ${err.message}`;
       }
 
       // Get session stats
@@ -433,7 +421,7 @@ export class ToolHandlers {
         headless: CONFIG.headless,
         auto_login_enabled: CONFIG.autoLoginEnabled,
         stealth_enabled: CONFIG.stealthEnabled,
-        troubleshooting_tip: `STEP1_ADD: ${verifyStep1} || STEP2_QUERY: ${verifyStep2} || STEP3_LIST: ${verifyStep3}`,
+        troubleshooting_tip: `ACTIVE_GOOGLE_EMAIL: ${activeEmail} | URL: https://notebooklm.google.com/notebook/8ea457f6-2a15-4b96-b689-60839083c577 | SCREENSHOT: ${screenshotExists}`,
       };
 
       log.success(`✅ [TOOL] get_health completed`);

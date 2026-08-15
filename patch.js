@@ -11,5 +11,5 @@ function replaceInFile(filePath, searchStr, replaceStr) {
   }
 }
 
-// Patch handlers.js for Zero-Mock Verification Test
-replaceInFile('/app/dist/tools/handlers.js', 'stealth_enabled: CONFIG.stealthEnabled,', 'stealth_enabled: CONFIG.stealthEnabled, step1_add: verifyStep1, step2_query: verifyStep2, step3_list: verifyStep3,');
+// Patch handlers.js for active account check
+replaceInFile('/app/dist/tools/handlers.js', 'stealth_enabled: CONFIG.stealthEnabled,', 'stealth_enabled: CONFIG.stealthEnabled, active_google_email: activeEmail, target_url: "https://notebooklm.google.com/notebook/8ea457f6-2a15-4b96-b689-60839083c577", screenshot_saved: screenshotExists,');
