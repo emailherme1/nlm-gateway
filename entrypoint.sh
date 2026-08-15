@@ -33,7 +33,10 @@ node -e '
       args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
     });
     const page = context.pages()[0] || await context.newPage();
-    await page.goto("https://notebooklm.google.com", { waitUntil: "networkidle", timeout: 45000 });
+    await page.goto("https://myaccount.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.waitForTimeout(2000);
+    await page.goto("https://notebooklm.google.com/", { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.waitForTimeout(3000);
     await context.storageState({ path: "/data/browser_state/state.json" });
     await context.close();
     console.log("STATE_DUMP_SUCCESS");
