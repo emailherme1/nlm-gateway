@@ -22,3 +22,7 @@ replaceInFile('/app/dist/tools/handlers.js', 'error: "Authentication failed or w
 // Patch auth-manager.js
 replaceInFile('/app/dist/auth/auth-manager.js', 'log.error(`❌ Login failed: ${error}`);', 'throw new Error(`EXPOSED_LOGIN_FAIL: ${error}`);');
 replaceInFile('/app/dist/auth/auth-manager.js', 'return false;', 'throw new Error("EXPOSED_LOGIN_RETURN_FALSE");');
+
+// Patch browser-session.js to trust persistent profile /data/chrome_profile
+replaceInFile('/app/dist/session/browser-session.js', 'log.error(`  ❌ Auto-login disabled and no valid auth state - manual login required`);\n            return false;', 'log.info(`  ✅ Single profile mode - trusting persistent /data/chrome_profile`);\n            return true;');
+replaceInFile('/app/dist/session/browser-session.js', 'log.error(`  ❌ Auto-login disabled and no valid auth state - manual login required`);\r\n            return false;', 'log.info(`  ✅ Single profile mode - trusting persistent /data/chrome_profile`);\r\n            return true;');

@@ -39,6 +39,10 @@ COPY src/tools/handlers.ts /app/src/tools/handlers.ts
 RUN npm install
 RUN npm run build
 
+# Run runtime patches for persistent single-profile auth fallback
+COPY patch.js /app/patch.js
+RUN node patch.js
+
 # Create directory for persistent Chrome profile and symlinks for env-paths
 RUN mkdir -p /data/chrome_profile
 RUN mkdir -p /root/.local/share/notebooklm-mcp
