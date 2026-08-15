@@ -184,19 +184,24 @@ export class BrowserSession {
 
     this.updateActivity();
 
-    const inputSelector = await this.findChatInput();
-    if (!inputSelector) {
-      log.warning("⚠️ Chat input element not found, attempting direct keyboard input fallback");
-      await this.page.keyboard.type(question, { delay: 50 });
-      await randomDelay(300, 700);
-      await this.page.keyboard.press("Enter");
-    } else {
-      log.info(`  🎯 Typing question into: ${inputSelector}`);
-      await this.page.focus(inputSelector);
-      await humanType(this.page, inputSelector, question);
-      await randomDelay(300, 700);
-      await this.page.keyboard.press("Enter");
+    // 1. Switch to Chat tab explicitly
+    try {
+      const chatTab = this.page.locator('button:has-text("Chat"), [role="tab"]:has-text("Chat"), div:has-text("Chat")').first();
+      if (await chatTab.isVisible()) {
+        await chatTab.click();
+        await this.page.waitForTimeout(2000);
+        log.info("  👉 Switched to Chat tab");
+      }
+    } catch (e) {
+      log.info("Chat tab switch skipped or already active");
     }
+
+    // 2. Locate input, fill and submit
+    const input = this.page.locator('textarea, [contenteditable="true"], [role="textbox"]').first();
+    await input.waitFor({ state: "visible", timeout: 10000 });
+    await input.fill(question);
+    await input.press("Enter");
+    log.info("  🎯 Submitted question to Chat input");
 
     await sendProgress?.("Waiting for response...", 3, 5);
 
