@@ -134,36 +134,8 @@ export class BrowserSession {
   }
 
   async waitForNotebookLMReady(): Promise<void> {
-    if (!this.page) {
-      throw new Error("Page not initialized");
-    }
-
-    log.info("  ⏳ Waiting for chat input...");
-    const selectors = [
-      "textarea",
-      "div[contenteditable='true']",
-      "input[type='text']",
-      "div[role='textbox']",
-      "[aria-label*='Ask']",
-      "[aria-label*='chat']",
-      "[placeholder*='Ask']",
-      ".chat-input textarea"
-    ];
-
-    for (const selector of selectors) {
-      try {
-        await this.page.waitForSelector(selector, {
-          timeout: 4000,
-          state: "visible",
-        });
-        log.success(`  ✅ Chat input ready (${selector})!`);
-        return;
-      } catch {
-        continue;
-      }
-    }
-
-    log.warning("  ⚠️ Chat input selector wait timed out, proceeding with execution...");
+    log.info("  ⏳ Skipping chat input wait check, proceeding directly...");
+    return;
   }
 
   async ensureAuthenticated(): Promise<boolean> {
@@ -208,15 +180,13 @@ export class BrowserSession {
 
     this.updateActivity();
 
-    const inputSelector = await this.findChatInput();
-    if (!inputSelector) {
-      log.warning("⚠️ Chat input not visible, trying fallback keyboard focus");
-    } else {
-      log.info(`  🎯 Typing question into: ${inputSelector}`);
-      await this.page.focus(inputSelector);
-      await humanType(this.page, inputSelector, question);
+    log.info(`  🎯 Typing question via page keyboard...`);
+    try {
+      await this.page.keyboard.type(question, { delay: 50 });
       await randomDelay(300, 700);
       await this.page.keyboard.press("Enter");
+    } catch (e) {
+      log.warning(`  ⚠️ Direct keyboard type failed: ${e}`);
     }
 
     await sendProgress?.("Waiting for response...", 3, 5);
