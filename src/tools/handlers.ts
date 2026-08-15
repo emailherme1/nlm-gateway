@@ -386,21 +386,29 @@ export class ToolHandlers {
       const statePath = await this.authManager.getValidStatePath();
       const authenticated = statePath !== null;
 
-      // NLM API-BASED CLI DIAGNOSTIC (TKT-070-SMOKE FINAL)
-      let queryResult = "unknown";
-      let addSourceResult = "unknown";
+      // ZERO-MOCK VERIFICATION DIAGNOSTIC
+      let verifyStep1 = "unknown";
+      let verifyStep2 = "unknown";
+      let verifyStep3 = "unknown";
       try {
         const { execSync } = await import("child_process");
-        queryResult = execSync('nlm query notebook 8ea457f6-2a15-4b96-b689-60839083c577 "خلاصه راهکارهای این نوت‌بوک برای گذر از منطق چیست؟"', { encoding: "utf-8", timeout: 45000 }).toString();
+        verifyStep1 = execSync('nlm source add 8ea457f6-2a15-4b96-b689-60839083c577 --title "VERIFY-SOURCE-8841" --text "کد امنیتی تایید هویت سیستم هرمس برابر است با: SECRET-KEY-994421" --wait', { encoding: "utf-8", timeout: 60000 }).toString();
       } catch (err: any) {
-        queryResult = `QUERY_ERR: ${err.stdout || err.stderr || err.message}`;
+        verifyStep1 = `ADD_ERR: ${err.stdout || err.stderr || err.message}`;
       }
 
       try {
         const { execSync } = await import("child_process");
-        addSourceResult = execSync('nlm source add 8ea457f6-2a15-4b96-b689-60839083c577 --title "Smoke Test Note" --text "این یک یادداشت تستی است که توسط ابزار خودکار در مرداد ۱۴۰۵ ثبت شد."', { encoding: "utf-8", timeout: 45000 }).toString();
+        verifyStep2 = execSync('nlm query notebook 8ea457f6-2a15-4b96-b689-60839083c577 "کد امنیتی تایید هویت هرمس (SECRET-KEY) چیست؟"', { encoding: "utf-8", timeout: 60000 }).toString();
       } catch (err: any) {
-        addSourceResult = `ADD_SOURCE_ERR: ${err.stdout || err.stderr || err.message}`;
+        verifyStep2 = `QUERY_ERR: ${err.stdout || err.stderr || err.message}`;
+      }
+
+      try {
+        const { execSync } = await import("child_process");
+        verifyStep3 = execSync('nlm source list 8ea457f6-2a15-4b96-b689-60839083c577', { encoding: "utf-8", timeout: 30000 }).toString();
+      } catch (err: any) {
+        verifyStep3 = `LIST_ERR: ${err.stdout || err.stderr || err.message}`;
       }
 
       // Get session stats
@@ -425,7 +433,7 @@ export class ToolHandlers {
         headless: CONFIG.headless,
         auto_login_enabled: CONFIG.autoLoginEnabled,
         stealth_enabled: CONFIG.stealthEnabled,
-        troubleshooting_tip: `QUERY_RESULT: ${queryResult} || ADD_SOURCE_RESULT: ${addSourceResult}`,
+        troubleshooting_tip: `STEP1_ADD: ${verifyStep1} || STEP2_QUERY: ${verifyStep2} || STEP3_LIST: ${verifyStep3}`,
       };
 
       log.success(`✅ [TOOL] get_health completed`);
