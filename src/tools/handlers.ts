@@ -386,6 +386,27 @@ export class ToolHandlers {
       const statePath = await this.authManager.getValidStatePath();
       const authenticated = statePath !== null;
 
+      // GROUND TRUTH DIAGNOSTIC TEST
+      let debugUrl = "unknown";
+      let debugTitle = "unknown";
+      let debugText = "unknown";
+      try {
+        const context = await this.sessionManager.getOrCreateContext();
+        const page = await context.newPage();
+        await page.goto("https://notebooklm.google.com/notebook/8ea457f6-2a15-4b96-b689-60839083c577", {
+          waitUntil: "domcontentloaded",
+          timeout: 25000,
+        });
+        await new Promise((r) => setTimeout(r, 5000));
+        debugUrl = page.url();
+        debugTitle = await page.title();
+        const bodyText = await page.innerText("body").catch(() => "");
+        debugText = bodyText.substring(0, 300).replace(/\s+/g, " ");
+        await page.close().catch(() => undefined);
+      } catch (err) {
+        debugText = `DIAG_ERR: ${err}`;
+      }
+
       // Get session stats
       const stats = this.sessionManager.getStats();
 
@@ -397,6 +418,9 @@ export class ToolHandlers {
       const result = {
         status: "ok",
         authenticated,
+        debugUrl,
+        debugTitle,
+        debugText,
         notebook_url: notebookUrl,
         active_notebook_id: active?.id ?? null,
         active_notebook_name: active?.name ?? null,
